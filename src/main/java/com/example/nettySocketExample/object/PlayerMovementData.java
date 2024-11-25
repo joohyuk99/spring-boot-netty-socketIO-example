@@ -11,20 +11,20 @@ import java.util.UUID;
 @Setter
 @Builder
 public class PlayerMovementData {
-    private String playerId;
+//    private String playerId;
     private float x;
     private float y;
-    private float rotation;
+//    private float rotation;
 
     public PlayerMovementData(
-            @JsonProperty("playerId") String playerId,
+//            @JsonProperty("playerId") String playerId,
             @JsonProperty("x") float x,
-            @JsonProperty("y") float y,
-            @JsonProperty("rotation") float rotation
+            @JsonProperty("y") float y
+//            @JsonProperty("rotation") float rotation
     ) {
-        this.playerId = playerId;
+//        this.playerId = playerId;
         this.x = x;
         this.y = y;
-        this.rotation = rotation;
+//        this.rotation = rotation;
     }
 }

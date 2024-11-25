@@ -10,8 +10,8 @@ import java.util.UUID;
 @Setter
 @Builder
 public class Player {
-    private float rotation;
-    private float x, y;
+//    private float rotation;
     private String playerId;
-    private String team;
+    private float x, y;
+//    private String team;
 }

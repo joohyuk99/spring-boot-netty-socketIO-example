@@ -27,33 +27,43 @@ public class NettySocketServerApplication implements CommandLineRunner {
 
         socketIOServer.start();
 
+        // broadcast each 50ms
+        new Thread(() -> {
+            while(true) {
+                try {
+                    Thread.sleep(50);
+                    socketIOServer.getBroadcastOperations().sendEvent("state", playerMap);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }).start();
+
+        // first connection with client
         socketIOServer.addConnectListener(client -> {
             System.out.println("Client connected: " + client.getSessionId());
 
             Player player = Player.builder()
-                    .rotation(0)
+                    .playerId(client.getSessionId().toString())
                     .x(300)
                     .y(300)
-                    .playerId(client.getSessionId().toString())
-                    .team("red").build();
+                    .build();
 
             playerMap.put(client.getSessionId().toString(), player);
-            client.sendEvent("currentPlayers", playerMap);
-
-            socketIOServer.getBroadcastOperations().sendEvent("newPlayer", player);
+            client.sendEvent("currentPlayer", player);
         });
 
-        socketIOServer.addEventListener("playerMovement", PlayerMovementData.class,
-                (client, movementData, ackSender) -> {
-
-            System.out.println("Player Movement: " + movementData.getX() + ", " + movementData.getY());
-
-            Player player = playerMap.get(client.getSessionId().toString());
-            player.setX(movementData.getX());
-            player.setY(movementData.getY());
-            player.setRotation(movementData.getRotation());
-
-            socketIOServer.getBroadcastOperations().sendEvent("playerMoved", playerMap);
+        socketIOServer.addEventListener("playerMove", PlayerMovementData.class,
+                (client, data, ackSender) -> {
+            System.out.println("playerMove: " + client.getSessionId());
+            String playerId = client.getSessionId().toString();
+            Player player = playerMap.get(playerId);
+            if(player != null) {
+                player.setX(data.getX());
+                player.setY(data.getY());
+                playerMap.put(playerId, player);
+            }
         });
 
         socketIOServer.addDisconnectListener(client -> {
